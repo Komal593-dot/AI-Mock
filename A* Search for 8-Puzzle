@@ -1,0 +1,51 @@
+from heapq import heappush, heappop
+
+goal = (1, 2, 3, 4, 5, 6, 7, 8, 0)
+
+def heuristic(state):
+    return sum(state[i] != goal[i] and state[i] != 0
+               for i in range(9))
+
+def neighbors(state):
+    i = state.index(0)
+    r, c = divmod(i, 3)
+
+    for dr, dc in [(1,0), (-1,0), (0,1), (0,-1)]:
+        nr, nc = r + dr, c + dc
+
+        if 0 <= nr < 3 and 0 <= nc < 3:
+            j = nr * 3 + nc
+            s = list(state)
+            s[i], s[j] = s[j], s[i]
+            yield tuple(s)
+
+def astar(start):
+    pq = []
+    heappush(pq, (heuristic(start), 0, start, []))
+    visited = set()
+
+    while pq:
+        f, g, state, path = heappop(pq)
+
+        if state in visited:
+            continue
+        visited.add(state)
+
+        if state == goal:
+            return path + [state]
+
+        for next_state in neighbors(state):
+            heappush(pq, (g + 1 + heuristic(next_state),
+                          g + 1, next_state, path + [state]))
+
+start = (1, 2, 3,
+         4, 0, 6,
+         7, 5, 8)
+
+solution = astar(start)
+
+for state in solution:
+    print(state[:3])
+    print(state[3:6])
+    print(state[6:])
+    print()
